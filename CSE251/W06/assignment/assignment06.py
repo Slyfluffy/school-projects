@@ -1,0 +1,106 @@
+'''
+Requirements
+1. Finish the team06 assignment (if necessary).
+2. Change your program to process all 300 images using 1 CPU, then 2 CPUs, all the way up to the
+   number of CPUs on your computer plus 4.
+3. Keep track of the time it takes to process all 300 images per CPU.
+4. Plot the time to process vs the number of CPUs.
+   
+Questions:
+1. What is the relationship between the time to process versus the number of CPUs?
+   Does there appear to be an asymptote? If so, what do you think the asymptote is?
+   > The closer we got to using the amount of cores I had the faster the processing of frames was.
+   > There was an asymptote as soon as we hit the core amount (I have 12 but it recognizes
+   > 20 logical processors, so 20). It was clearly visible
+   > as the last 4 rounds were above the core amount and took the same amount of time as 20.
+2. Is this a CPU bound or IO bound problem? Why?
+   > Since we aren't spending much time searching for a file (or waiting to receive/send info) I believe
+   > this is a cpu bound problem. The amount of time this takes depends on how fast each core can process
+   > the work.
+3. Would threads work on this assignment? Why or why not? (guess if you need to) 
+   > They would work but they would be taking a long time. This would be because the program
+   > would only be running on one core. We would be limited by how fast it can go through them.
+'''
+
+from matplotlib.pylab import plt  # load plot library
+from PIL import Image
+import numpy as np
+import timeit
+import multiprocessing as mp
+
+# 4 more than the number of cpu's on your computer
+CPU_COUNT = mp.cpu_count() + 4  
+
+# The amount of frames we are processing (all 300)
+FRAME_COUNT = 300
+
+RED   = 0
+GREEN = 1
+BLUE  = 2
+
+
+def create_new_frame(image_file, green_file, process_file):
+    """ Creates a new image file from image_file and green_file """
+
+    # this print() statement is there to help see which frame is being processed
+    print(f'{process_file[-7:-4]}', end=',', flush=True)
+
+    image_img = Image.open(image_file)
+    green_img = Image.open(green_file)
+
+    # Make Numpy array
+    np_img = np.array(green_img)
+
+    # Mask pixels 
+    mask = (np_img[:, :, BLUE] < 120) & (np_img[:, :, GREEN] > 120) & (np_img[:, :, RED] < 120)
+
+    # Create mask image
+    mask_img = Image.fromarray((mask*255).astype(np.uint8))
+
+    image_new = Image.composite(image_img, green_img, mask_img)
+    image_new.save(process_file)
+
+
+def process_file(image_number: int):
+    """ Processes the file into a frame"""
+    image_file = rf'elephant/image{image_number:03d}.png'
+    green_file = rf'green/image{image_number:03d}.png'
+    process_file = rf'processed/image{image_number:03d}.png'
+
+    create_new_frame(image_file, green_file, process_file)
+
+
+if __name__ == '__main__':
+    all_process_time = timeit.default_timer()
+
+    # Use two lists: one to track the number of CPUs and the other to track
+    # the time it takes to process the images given this number of CPUs.
+    xaxis_cpus = []
+    yaxis_times = []
+
+    image_numbers = []
+    for i in range(1, FRAME_COUNT + 1):
+        image_numbers.append(i)
+
+    for i in range(1, CPU_COUNT + 1):
+        xaxis_cpus.append(i)
+        print(f"Beginning test for {i} processes\n\n", "")
+        start_time = timeit.default_timer()
+        with mp.Pool(i) as p:
+            p.map(process_file, image_numbers)
+        yaxis_times.append(timeit.default_timer() - start_time)
+        print(f'\nTime To Process all images = {timeit.default_timer() - start_time}')
+
+    print(f'Total Time for ALL processing: {timeit.default_timer() - all_process_time}')
+
+    # create plot of results and also save it to a PNG file
+    plt.plot(xaxis_cpus, yaxis_times, label=f'{FRAME_COUNT}')
+    
+    plt.title('CPU Core yaxis_times VS CPUs')
+    plt.xlabel('CPU Cores')
+    plt.ylabel('Seconds')
+    plt.legend(loc='best')
+
+    plt.tight_layout()
+    plt.savefig(f'Plot for {FRAME_COUNT} frames.png')
+    plt.show()
