@@ -1,0 +1,4 @@
+C:\home\cs453\week05\password.txt
+C:\home\cs453\week05\..P455w0rd.txt
+C:\home\cs453\week05\.\password.txt
+C:\home\cs453\week05\./wrong.txt

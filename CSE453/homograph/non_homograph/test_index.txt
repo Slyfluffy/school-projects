@@ -1,0 +1,4 @@
+./non_homograph/simple.txt
+./non_homograph/one_dot.txt
+./non_homograph/two_dots.txt
+./non_homograph/complex.txt

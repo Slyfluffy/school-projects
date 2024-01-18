@@ -1,0 +1,4 @@
+.././homograph/test.txt
+./../homograph/test.txt
+C:\home\cs453\week05\..\.\week05\password.txt
+C:\home\cs453\week05\Password.txt

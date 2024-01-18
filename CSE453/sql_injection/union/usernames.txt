@@ -1,0 +1,3 @@
+table1 UNION SELECT
+users UNION SELECT
+passwords UNION SELECT

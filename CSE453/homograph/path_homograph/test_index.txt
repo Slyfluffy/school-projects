@@ -1,0 +1,4 @@
+./homograph/simple.txt
+./homograph/one_dot.txt
+./homograph/two_dots.txt
+./homograph/complex.txt

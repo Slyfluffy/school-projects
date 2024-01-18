@@ -1,0 +1,4 @@
+./././test.txt
+././secret/test.txt
+test.txt
+./secret/test.txt
